@@ -1,0 +1,11 @@
+---
+# Deploys a kubernetes master node
+- name: K8s master node configuration
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+    - role: kubernetes-master
+    - role: helm
+    - role: istio

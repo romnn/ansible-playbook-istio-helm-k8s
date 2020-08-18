@@ -1,0 +1,6 @@
+*.log
+.vagrant/
+.idea/
+
+# This join command will be generated automatically
+temp-join-command

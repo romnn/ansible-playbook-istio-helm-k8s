@@ -1,0 +1,4 @@
+---
+# Installs the helm package manager in an existing kubernetes cluster
+- include_tasks: install-helm.yml
+- include_tasks: initialize-helm.yml

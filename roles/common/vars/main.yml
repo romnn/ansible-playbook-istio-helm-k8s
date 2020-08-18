@@ -1,0 +1,8 @@
+
+kubernetes_pod_network_cidr: '10.244.0.0/16'
+allow_pods_on_master: true
+kubernetes_enable_web_ui: true
+
+# Flannel config files.
+flannel_manifest_file_rbac: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k8s-manifests/kube-flannel-rbac.yml
+flannel_manifest_file: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml

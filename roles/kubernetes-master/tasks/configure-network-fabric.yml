@@ -1,0 +1,9 @@
+---
+- name: Configure flannel network fabric
+  become_user: vagrant
+  command: "{{ item }}"
+  with_items:
+    - kubectl apply -f {{ flannel_manifest_file_rbac }}
+    - kubectl apply -f {{ flannel_manifest_file }}
+  register: flannel_setup_result
+  changed_when: "'created' in flannel_setup_result.stdout"

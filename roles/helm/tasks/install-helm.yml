@@ -1,0 +1,48 @@
+---
+- name: Check for existing installation of helm
+  stat:
+    path: '{{ helm_install_dir }}'
+  changed_when: false
+  register: kubernetes_helm_binary_already_exists
+
+- when: not kubernetes_helm_binary_already_exists.stat.exists
+  block:
+    - name: Getting the helm archive checksum
+      uri:
+        url: '{{ helm_checksum_url }}'
+        return_content: true
+      changed_when: false
+      register: helm_archive_checksum
+
+    - name: Download the helm archive
+      get_url:
+        url: '{{ helm_download_url }}'
+        dest: '/tmp/{{ helm_archive }}'
+        checksum: 'sha256:{{ helm_archive_checksum.content }}' #'{{ kubernetes_helm_checksum }}'
+        mode: 0644
+
+    - name: Create an installation directory for helm
+      file:
+        path: '{{ helm_install_dir }}'
+        state: directory
+        mode: 0755
+
+    - name: Unarchiving helm
+      unarchive:
+        copy: no
+        src: '/tmp/{{ helm_archive }}'
+        dest: '{{ helm_install_dir }}'
+        creates: '{{ helm_install_dir }}/{{ helm_platform }}'
+  always:
+    - name: Cleaning helm archive
+      file:
+        path: '/tmp/{{ helm_archive }}'
+        state: absent
+
+- name: Linking the helm binary
+  file:
+    src: '{{ helm_install_dir }}/{{ helm_platform }}/helm'
+    dest: '{{ helm_bin_dir }}/helm'
+    owner: vagrant
+    group: vagrant
+    state: link

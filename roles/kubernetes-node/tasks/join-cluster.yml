@@ -1,0 +1,6 @@
+---
+- name: Copy the join command to the node
+  copy: src=temp-join-command dest=/tmp/join-command.sh mode=0777
+
+- name: Join kubernetes master cluster
+  command: sh /tmp/join-command.sh creates=/etc/kubernetes/kubelet.conf

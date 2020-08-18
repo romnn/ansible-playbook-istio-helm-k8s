@@ -1,0 +1,4 @@
+---
+- include_tasks: install-docker.yml
+- include_tasks: disable-swap.yml
+- include_tasks: install-kubernetes.yml

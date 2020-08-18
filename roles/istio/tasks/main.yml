@@ -1,0 +1,61 @@
+---
+- when: enabled
+  block:
+  - name: Resolve platform specific vars for istio
+    include_vars: '{{ item }}'
+    with_first_found:
+    - files:
+      - '{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml'
+      - '{{ ansible_distribution }}.yml'
+      - '{{ ansible_os_family }}.yml'
+      skip: true
+      paths:
+      - '{{ role_path }}/vars'
+  
+  - name: Checks for istio install
+    stat:
+      path: '{{ istio_bin_dir }}/istioctl'
+    register: istio_binary
+    changed_when: False
+  
+  - when: not istio_binary.stat.exists
+    block:
+    - name: Download istio
+      get_url:
+        url: '{{ istio_tgz_url }}'
+        dest: /tmp/{{ istio_tgz }}
+        checksum: '{{ istio_checksum }}'
+        mode: 0644
+        owner: vagrant
+        group: vagrant
+
+    - name: Create an installation directory for istio
+      file:
+        path: '{{ istio_install_dir }}'
+        state: directory
+        mode: 0755
+    
+    - name: Unarchive istio
+      unarchive:
+        copy: no
+        src: '/tmp/{{ istio_tgz }}'
+        dest: '{{ istio_install_dir }}'
+        creates: '{{ istio_install_dir }}/istio-{{ istio_ver }}/bin'
+    always:
+      - name: cleanup...
+        file:
+          path: /tmp/{{ istio_tgz }}
+          state: absent
+
+  - file: dest={{ istio_install_dir }} owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
+
+  - debug:
+      msg: "Linking the istioctl binary from {{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl to {{ istio_bin_dir }}/istioctl"
+
+  - name: Linking the istioctl binary
+    file:
+      src: '{{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl'
+      dest: '{{ istio_bin_dir }}/istioctl'
+      owner: vagrant
+      group: vagrant
+      state: link

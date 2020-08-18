@@ -1,0 +1,7 @@
+---
+# Configures a k8s master node
+- include_tasks: initialize-cluster.yml
+- include_tasks: configure-network-fabric.yml
+- include_tasks: check-taint.yml
+- include_tasks: configure-dashboard.yml
+- include_tasks: prepare-join.yml

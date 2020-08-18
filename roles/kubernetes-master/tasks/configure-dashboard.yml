@@ -1,0 +1,14 @@
+---
+- name: Check if kubernetes dashboard service exists
+  shell: kubectl get services --namespace kube-system | grep -q kubernetes-dashboard
+  changed_when: false
+  failed_when: false
+  register: kubernetes_dashboard_service_already_exists
+  when: kubernetes_enable_web_ui | bool
+
+- name: Enable the kubernetes dashboard (if configured)
+  become_user: vagrant
+  command: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml"
+  when:
+    - kubernetes_enable_web_ui | bool
+    - kubernetes_dashboard_service_already_exists is failed
