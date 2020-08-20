@@ -1,6 +1,6 @@
 ---
 - name: Check if pods on master node are enabled
-  become_user: vagrant
+  become_user: "{{service_user}}"
   shell: "kubectl get nodes -o json | jq '.items[].spec.taints[].key'"
   register: all_taints
   changed_when: false
@@ -12,7 +12,7 @@
   when: false
 
 - name: Allow pods on master node (if configured)
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
   changed_when: false
   ignore_errors: true

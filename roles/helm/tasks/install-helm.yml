@@ -43,6 +43,6 @@
   file:
     src: '{{ helm_install_dir }}/{{ helm_platform }}/helm'
     dest: '{{ helm_bin_dir }}/helm'
-    owner: vagrant
-    group: vagrant
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
     state: link

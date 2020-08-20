@@ -1,6 +1,6 @@
 ---
 - name: Get kubeadm join token from the kubernetes master node
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: kubeadm token create --print-join-command
   changed_when: false
   register: kubernetes_join_command_result

@@ -7,8 +7,8 @@
   when: kubernetes_enable_web_ui | bool
 
 - name: Enable the kubernetes dashboard (if configured)
-  become_user: vagrant
-  command: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml"
+  become_user: "{{service_user}}"
+  command: "kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml"
   when:
     - kubernetes_enable_web_ui | bool
     - kubernetes_dashboard_service_already_exists is failed

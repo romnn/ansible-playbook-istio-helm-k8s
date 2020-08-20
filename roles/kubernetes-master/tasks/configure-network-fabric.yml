@@ -1,6 +1,6 @@
 ---
 - name: Configure flannel network fabric
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: "{{ item }}"
   with_items:
     - kubectl apply -f {{ flannel_manifest_file_rbac }}

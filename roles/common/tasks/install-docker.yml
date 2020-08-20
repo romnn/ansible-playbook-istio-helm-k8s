@@ -58,8 +58,8 @@
     enabled: true
   when: docker_config is changed
 
-- name: Add vagrant user to docker group
+- name: Add {{service_user}} user to docker group
   user:
-    name: vagrant
+    name: "{{service_user}}"
     group: docker
     append: yes

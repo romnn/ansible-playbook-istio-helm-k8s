@@ -4,7 +4,7 @@
     major_helm_version: "{{ helm_version[0] | int }}"
 
 - name: Check if helm is already initialized
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: kubectl get pods --namespace kube-system
   changed_when: false
   register: tiller_running
@@ -17,7 +17,7 @@
   when: major_helm_version | int < 3
 
 - name: Apply admin cluster role binding for tiller
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: kubectl create -f tiller-rbac-config.yml
   register: tiller_service_account
   failed_when: false
@@ -25,19 +25,19 @@
   when: "major_helm_version | int < 3"
 
 - name: Initialize helm
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: helm init --history-max 200 --service-account tiller
   register: kubernetes_helm_binary_already_exists
   when: "major_helm_version | int < 3 and not 'tiller' in tiller_running.stdout"
 
 - name: Update helm repo
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: helm repo update
   changed_when: false
   ignore_errors: true
 
 - name: Add stable helm repository
-  become_user: vagrant
+  become_user: "{{service_user}}"
   command: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
   register: stable_repo_added
   changed_when: "'has been added to your repositories' in stable_repo_added.stdout"

@@ -19,34 +19,34 @@
     - not kubernetes_already_initialized.stat.exists
     - kubeadmin_init is failed
 
-- name: Create vagrant kube config directory
-  become_user: vagrant
+- name: Create {{service_user}} kube config directory
+  become_user: "{{service_user}}"
   file:
-    path: /home/vagrant/.kube
-    owner: vagrant
-    group: vagrant
+    path: /home/{{service_user}}/.kube
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
     state: directory
     mode: '0755'
 
 - name: Change kube config permissions
   file:
     path: /etc/kubernetes/admin.conf
-    owner: vagrant
-    group: vagrant
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
     mode: '0755'
 
-- name: Setup access for vagrant user
-  become_user: vagrant
+- name: Setup access for {{service_user}} user
+  become_user: "{{service_user}}"
   file:
     src: /etc/kubernetes/admin.conf
-    dest: /home/vagrant/.kube/config
-    owner: vagrant
-    group: vagrant
+    dest: /home/{{service_user}}/.kube/config
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
     state: link
     mode: '0755'
 
 - name: Testing kubectl access
-  become_user: vagrant
+  become_user: "{{service_user}}"
   shell: "kubectl get nodes -o json | jq '.items | length'"
   register: node_count
   failed_when: node_count.rc != 0

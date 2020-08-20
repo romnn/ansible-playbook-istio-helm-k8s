@@ -26,8 +26,8 @@
         dest: /tmp/{{ istio_tgz }}
         checksum: '{{ istio_checksum }}'
         mode: 0644
-        owner: vagrant
-        group: vagrant
+        owner: "{{service_user}}"
+        group: "{{service_group}}"
 
     - name: Create an installation directory for istio
       file:
@@ -47,7 +47,7 @@
           path: /tmp/{{ istio_tgz }}
           state: absent
 
-  - file: dest={{ istio_install_dir }} owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
+  - file: dest={{ istio_install_dir }} owner={{service_user}} group={{service_group}} mode=u=rwX,g=rX,o=rX recurse=yes
 
   - debug:
       msg: "Linking the istioctl binary from {{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl to {{ istio_bin_dir }}/istioctl"
@@ -56,6 +56,6 @@
     file:
       src: '{{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl'
       dest: '{{ istio_bin_dir }}/istioctl'
-      owner: vagrant
-      group: vagrant
+      owner: "{{service_user}}"
+      group: "{{service_group}}"
       state: link
