@@ -20,7 +20,8 @@
     - kubeadmin_init is failed
 
 - name: Create {{service_user}} kube config directory
-  become_user: "{{service_user}}"
+  # become_user: "{{service_user}}"
+  become: true
   file:
     path: /home/{{service_user}}/.kube
     owner: "{{service_user}}"
