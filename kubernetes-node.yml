@@ -1,7 +1,7 @@
 ---
 # Deploys a kubernetes worker node
 - name: K8s worker node configuration
-  hosts: k8s-workers
+  hosts: k8sworkers
   become: true
   gather_facts: true
   roles:
