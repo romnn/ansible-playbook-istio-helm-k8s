@@ -1,7 +1,7 @@
 ---
 # Deploys a kubernetes master node
 - name: K8s master node configuration
-  hosts: k8smasters
+  hosts: k8s-masters
   become: true
   gather_facts: true
   roles:
