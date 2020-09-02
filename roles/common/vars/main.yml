@@ -1,8 +1,7 @@
 
 kubernetes_pod_network_cidr: '10.244.0.0/16'
 allow_pods_on_master: true
-kubernetes_enable_web_ui: true
-# service_user: romnn
+kubernetes_enable_web_ui: false
 service_user: vagrant
 service_group: vagrant
 
