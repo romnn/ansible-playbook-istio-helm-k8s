@@ -1,12 +1,12 @@
 ---
-- name: Allow scheduling pods on all nodes
+- name: Temporarily allow scheduling pods on all nodes
   become_user: "{{service_user}}"
   # command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
   command: "kubectl taint nodes --all {{ item }}=true:NoSchedule-"
   register: removed_taint
   changed_when: '"not found" not in removed_taint.stderr'
   failed_when: 'removed_taint.rc != 0 and "not found" not in removed_taint.stderr'
-  when: "allow_pods_on_master | bool"
+  # when: "allow_pods_on_master | bool"
   with_items:
     - node-role.kubernetes.io/control-plane
     - node-role.kubernetes.io/master

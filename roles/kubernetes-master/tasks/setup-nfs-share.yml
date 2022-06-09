@@ -1,0 +1,33 @@
+---
+- name: Install nfs server packages
+  apt:
+    name: 
+      - nfs-kernel-server
+    state: present
+    update_cache: yes
+
+- name: Create /mnt/nfs_share directory
+  file:
+    path: /mnt/nfs_share
+    owner: nobody
+    group: nogroup
+    state: directory
+    mode: 0777
+
+- name: Add nfs share to /etc/exports
+  lineinfile:
+    path: /etc/exports
+    state: present
+    line: "{{ item }}"
+  with_items:
+    - '/mnt/nfs_share  127.0.0.1(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)'
+    - '/mnt/nfs_share  192.168.56.10(rw,sync,no_subtree_check,no_root_squash,no_all_squash,insecure)'
+
+- name: Restart nfs-kernel-server
+  service:
+    name: nfs-kernel-server
+    daemon_reload: yes
+    state: restarted
+
+- name: Refresh nfs exports
+  command: exportfs -rav

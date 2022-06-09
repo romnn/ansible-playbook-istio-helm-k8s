@@ -2,5 +2,6 @@
 .vagrant/
 .idea/
 
-# This join command will be generated automatically
+# join commmand and kubeconfig
 temp-join-command
+.kubeconfig.yml

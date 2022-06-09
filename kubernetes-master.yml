@@ -5,8 +5,9 @@
   gather_facts: true
   roles:
     - role: common
-    # - role: helm
+    - role: helm
     - role: kubernetes-master
+    - role: kubernetes-master-post
     # - role: istio
     #   when: enable_istio|bool
 

@@ -1,4 +1,9 @@
 ---
+- name: Set node hostname
+  when: "hostname is defined"
+  ansible.builtin.hostname:
+    name: "{{ hostname }}"
+
 - name: Update all packages to the latest version.
   apt:
     upgrade: dist
@@ -29,11 +34,26 @@
       - pyyaml
       - kubernetes
 
-- name: Disable ufw
-  ufw: state=disabled
+- name: Disable firewalld
+  service:
+    name: firewalld
+    state: stopped
+    enabled: false
   ignore_errors: true
+
+- name: Disable ufw
+  service:
+    name: ufw
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Disable ufw
+  ufw:
+    state: disabled
 
 - name: Set SELinux to permissive
   command: setenforce 0
-  ignore_errors: true
+  register: selinux_permissive
+  failed_when: 'selinux_permissive.rc != 0 and "SELinux is disabled" not in selinux_permissive.stderr'
 

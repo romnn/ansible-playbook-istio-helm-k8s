@@ -1,0 +1,6 @@
+---
+- include_tasks: install-metallb.yml
+- include_tasks: install-nginx-ingress.yml
+- include_tasks: install-cert-manager.yml
+- include_tasks: install-nfs-provisioner.yml
+- include_tasks: install-metrics-server.yml

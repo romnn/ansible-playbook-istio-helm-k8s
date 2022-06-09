@@ -1,0 +1,20 @@
+---
+- name: Add metrics-server helm repo
+  become_user: "{{service_user}}"
+  kubernetes.core.helm_repository:
+    name: bitnami
+    repo_url: "https://charts.bitnami.com/bitnami"
+
+- name: Deploy metrics-server
+  become_user: "{{service_user}}"
+  kubernetes.core.helm:
+    name: metrics-server
+    chart_ref: bitnami/metrics-server
+    wait: true
+    release_namespace: kube-system
+    values:
+      extraArgs:
+        - '--kubelet-insecure-tls=true'
+        - '--kubelet-preferred-address-types=InternalIP'
+      apiService:
+        create: true

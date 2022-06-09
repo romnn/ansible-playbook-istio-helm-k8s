@@ -1,0 +1,23 @@
+---
+- name: Create nfs-client-provisioner namespace
+  become_user: "{{service_user}}"
+  kubernetes.core.k8s:
+    name: nfs-client-provisioner
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Deploy nfs-client-provisioner
+  become_user: "{{service_user}}"
+  kubernetes.core.helm:
+    name: nfs-client-provisioner
+    chart_ref: stable/nfs-client-provisioner
+    wait: true
+    release_namespace: nfs-client-provisioner
+    chart_version: "v{{nfs_client_provisioner_version}}"
+    values:
+      nfs:
+        server: "{{ apiserver_advertise_address }}"
+        path: /mnt/nfs_share 
+      storageClass:
+        name: nfsc

@@ -1,0 +1,11 @@
+---
+- name: Disable scheduling pods on controller nodes
+  become_user: "{{service_user}}"
+  command: "kubectl taint nodes --all {{ item }}=true:NoSchedule"
+  register: added_taint
+  changed_when: '"already has" not in added_taint.stderr'
+  failed_when: 'added_taint.rc != 0 and "already has" not in added_taint.stderr'
+  when: "not allow_pods_on_master"
+  with_items:
+    - node-role.kubernetes.io/control-plane
+    - node-role.kubernetes.io/master

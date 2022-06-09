@@ -68,32 +68,32 @@
         # - 8472/udp # flannel
         - 6443/tcp # apiserver
         # - 2379-2380/tcp # etcd server client API
+        - 22/tcp # ssh
+        - 80/tcp # http
+        - 80/udp # http
+        - 443/tcp # https
+        - 443/udp # https
+
+    - name: open required trusted ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+        zone: trusted
+      with_items:
+        - 8090/tcp # platform agent
+        - 10250/tcp # kubelet API server
+        - 10251/tcp # kube-scheduler
+        - 10252/tcp # kube-controller-manager
+        - 8285/udp # flannel
+        - 8472/udp # flannel
+        # - 6443/tcp # apiserver
+        - 2379-2380/tcp # etcd server client API
         # - 22/tcp # ssh
         # - 80/tcp # http
         # - 80/udp # http
         # - 443/tcp # https
         # - 443/udp # https
-
-    # - name: open required trusted ports
-    #   ansible.posix.firewalld:
-    #     port: "{{ item }}"
-    #     permanent: yes
-    #     state: enabled
-    #     zone: trusted
-    #   with_items:
-    #     # - 8090/tcp # platform agent
-    #     # - 10250/tcp # kubelet API server
-    #     # - 10251/tcp # kube-scheduler
-    #     # - 10252/tcp # kube-controller-manager
-    #     # - 8285/udp # flannel
-    #     # - 8472/udp # flannel
-    #     # - 6443/tcp # apiserver
-    #     # - 2379-2380/tcp # etcd server client API
-    #     # - 22/tcp # ssh
-    #     # - 80/tcp # http
-    #     # - 80/udp # http
-    #     # - 443/tcp # https
-    #     # - 443/udp # https
 
     # - name: enable masquerade
     #   ansible.posix.firewalld:

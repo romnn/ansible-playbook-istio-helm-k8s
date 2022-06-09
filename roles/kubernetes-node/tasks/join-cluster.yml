@@ -12,3 +12,7 @@
 
 - name: Join kubernetes master cluster
   command: sh /tmp/join-command.sh creates=/etc/kubernetes/kubelet.conf
+
+# set the node ip
+# /var/lib/kubelet/config.yaml
+# with yq
