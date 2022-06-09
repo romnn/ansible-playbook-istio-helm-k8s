@@ -1,23 +1,13 @@
 ---
-- name: Check if pods on master node are enabled
+- name: Allow scheduling pods on all nodes
   become_user: "{{service_user}}"
-  shell: "kubectl get nodes -o json | jq '.items[].spec.taints[].key'"
-  register: all_taints
-  changed_when: false
-  failed_when: all_taints.rc != 0
-  when: false # Disable for now
-
-- debug:
-    msg: "All taints for all nodes: {{ all_taints.stdout }}"
-  when: false
-
-- name: Allow pods on master node (if configured)
-  become_user: "{{service_user}}"
-  command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
-  changed_when: false
-  ignore_errors: true
-  when:
-    - allow_pods_on_master | bool
-  #  - all_taints | from_json | unique | length == 1
-  #  - all_taints | from_json | unique == "node-role.kubernetes.io/master"
-  #  - all_taints | from_json | length == 1
+  # command: "kubectl taint nodes --all node-role.kubernetes.io/master-"
+  command: "kubectl taint nodes --all {{ item }}=true:NoSchedule-"
+  register: removed_taint
+  changed_when: '"not found" not in removed_taint.stderr'
+  failed_when: 'removed_taint.rc != 0 and "not found" not in removed_taint.stderr'
+  when: "allow_pods_on_master | bool"
+  with_items:
+    - node-role.kubernetes.io/control-plane
+    - node-role.kubernetes.io/master
+    - node-role.kubernetes.io/worker

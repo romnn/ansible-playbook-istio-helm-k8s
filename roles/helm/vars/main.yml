@@ -2,7 +2,7 @@
 # archive:  https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz
 # checksum  https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz.sha256
 helm_mirror: "https://get.helm.sh"
-helm_version: "3.0.0"
+helm_version: "3.9.0"
 helm_platform: "linux-amd64"
 helm_archive: "helm-v{{helm_version}}-{{helm_platform}}.tar.gz"
 helm_download_url: "{{helm_mirror}}/{{helm_archive}}"

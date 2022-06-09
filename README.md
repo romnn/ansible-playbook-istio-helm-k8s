@@ -11,6 +11,10 @@ The playbook also takes care of setting up a kubernetes _master_ and
 makes the _worker_ machines join the cluster.
 
 #### Try it out
+ansible-galaxy collection install ansible.posix
+ansible-galaxy collection install community.general
+ansible-galaxy collection install kubernetes.core
+
 To try out the playbook, install the following packages (assumes you are running on ubuntu):
 - [virtualbox](https://www.virtualbox.org/) by downloading the `.deb` from [the download page](https://www.virtualbox.org/wiki/Linux_Downloads) and installing it with
     ```bash

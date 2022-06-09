@@ -1,5 +1,5 @@
 ---
-- when: enabled
+- when: enable_istio
   block:
   - name: Resolve platform specific vars for istio
     include_vars: '{{ item }}'

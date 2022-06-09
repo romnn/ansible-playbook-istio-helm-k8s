@@ -1,0 +1,12 @@
+---
+# https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cmctl-linux-amd64.tar.gz
+certman_version: "1.8.0"
+cmctl_releases: "https://github.com/cert-manager/cert-manager/releases/download"
+cmctl_platform: "linux-amd64"
+cmctl_archive: "cmctl-{{cmctl_platform}}.tar.gz"
+cmctl_download_url: "{{cmctl_releases}}/v{{certman_version}}/{{cmctl_archive}}"
+
+cmctl_bin_dir: "/usr/local/bin"
+cmctl_install_dir: "{{cmctl_bin_dir}}/cmctl-v{{certman_version}}"
+
+acmeIssuerEmail: "example@domain.com"

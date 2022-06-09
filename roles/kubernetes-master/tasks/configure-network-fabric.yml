@@ -1,9 +1,13 @@
 ---
-- name: Configure flannel network fabric
+- name: Download flannel manifest
   become_user: "{{service_user}}"
-  command: "{{ item }}"
-  with_items:
-    - kubectl apply -f {{ flannel_manifest_file_rbac }}
-    - kubectl apply -f {{ flannel_manifest_file }}
-  register: flannel_setup_result
-  changed_when: "'created' in flannel_setup_result.stdout"
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+    dest: ~/kube-flannel.yml
+    mode: 0664
+
+- name: Apply flannel network fabric manifest
+  become_user: "{{service_user}}"
+  kubernetes.core.k8s:
+    state: present
+    src: ~/kube-flannel.yml

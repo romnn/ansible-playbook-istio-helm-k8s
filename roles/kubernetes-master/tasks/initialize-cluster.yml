@@ -1,4 +1,9 @@
 ---
+- name: Check if k8s master node can bind to advertised ip address
+  script: "check_can_bind_port.py {{ apiserver_advertise_address }} 2380"
+  changed_when: false
+  when: kubernetes_already_initialized.rc != 0
+
 - name: Initialize kubernetes master with kubeadm
   command: >
     kubeadm init
@@ -6,45 +11,56 @@
     --ignore-preflight-errors=all
     --pod-network-cidr={{ kubernetes_pod_network_cidr }}
     --apiserver-advertise-address={{ apiserver_advertise_address }}
-    --apiserver-cert-extra-sans={{ apiserver_advertise_address }}
-  #--config /etc/default/kubelet
-  #--kubernetes-version {{ kubernetes_version_kubeadm }}
-  #--ignore-preflight-errors={{ kubernetes_ignore_preflight_errors }}
-  #{{ kubernetes_kubeadm_init_extra_opts }}
+    --apiserver-cert-extra-sans={{ apiserver_cert_extra_sans }}
   register: kubeadmin_init
-  when: not kubernetes_already_initialized.stat.exists
-
-- debug: var=kubeadmin_init #.stdout
+  when: kubernetes_already_initialized.rc != 0
+  
+- debug: var=kubeadmin_init
   when:
-    - not kubernetes_already_initialized.stat.exists
+    - kubernetes_already_initialized.rc != 0
     - kubeadmin_init is failed
 
 - name: Create {{service_user}} kube config directory
-  # become_user: "{{service_user}}"
-  become: true
   file:
     path: /home/{{service_user}}/.kube
     owner: "{{service_user}}"
     group: "{{service_group}}"
     state: directory
-    mode: '0755'
+    mode: 0700
 
-- name: Change kube config permissions
-  file:
-    path: /etc/kubernetes/admin.conf
-    owner: "{{service_user}}"
-    group: "{{service_group}}"
-    mode: '0755'
+- name: Copy kube config to local file
+  fetch:
+    src: "/etc/kubernetes/admin.conf"
+    dest: "./.kubeconfig.yml"
+    flat: yes
+
+# - name: Change kube config permissions
+#   file:
+#     path: /etc/kubernetes/admin.conf
+#     owner: "{{service_user}}"
+#     group: "{{service_group}}"
+#     # mode: 0755
+#     mode: 600
+
+# - name: Setup access for {{service_user}} user
+#   become_user: "{{service_user}}"
+#   file:
+#     src: /etc/kubernetes/admin.conf
+#     dest: /home/{{service_user}}/.kube/config
+#     owner: "{{service_user}}"
+#     group: "{{service_group}}"
+#     state: link
+#     mode: 0755
 
 - name: Setup access for {{service_user}} user
-  become_user: "{{service_user}}"
-  file:
+  copy:
     src: /etc/kubernetes/admin.conf
     dest: /home/{{service_user}}/.kube/config
     owner: "{{service_user}}"
     group: "{{service_group}}"
-    state: link
-    mode: '0755'
+    mode: 0700
+    remote_src: true
+
 
 - name: Testing kubectl access
   become_user: "{{service_user}}"

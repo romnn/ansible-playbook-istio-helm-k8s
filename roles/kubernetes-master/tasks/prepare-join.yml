@@ -9,9 +9,15 @@
 
 - name: Remove existing join command files
   become: false
-  local_action: file path="./temp-join-command" state=absent
+  local_action:
+    module: file
+    path: "./temp-join-command"
+    state: absent
 
 - name: Copy join command to local file
   when: kubernetes_join_command_result.stdout is defined
   become: false
-  local_action: copy content="{{ kubernetes_join_command_result.stdout_lines[0] }}" dest="./temp-join-command"
+  local_action:
+    module: copy
+    content: "{{ kubernetes_join_command_result.stdout_lines[0] }}"
+    dest: "./temp-join-command"

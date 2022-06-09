@@ -1,0 +1,39 @@
+---
+- name: Update all packages to the latest version.
+  apt:
+    upgrade: dist
+    update_cache: yes
+
+- name: Install required dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - lsb-release
+      - gnupg-agent
+      - gnupg
+      - software-properties-common
+      - jq
+      - python3
+      - python3-pip
+      - selinux-utils
+      - firewalld
+    state: present
+    update_cache: yes
+
+- name: Install pip packages on remote for ansible
+  pip:
+    name:
+      - yq
+      - pyyaml
+      - kubernetes
+
+- name: Disable ufw
+  ufw: state=disabled
+  ignore_errors: true
+
+- name: Set SELinux to permissive
+  command: setenforce 0
+  ignore_errors: true
+

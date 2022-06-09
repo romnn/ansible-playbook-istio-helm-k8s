@@ -1,3 +1,4 @@
+---
 - name: Restart kubelet
   service:
     name: kubelet
@@ -6,3 +7,24 @@
 
 - name: docker status
   service: name=docker state=started
+
+- name: restart containerd
+  command: /bin/true
+  notify:
+    - containerd | Restart containerd
+    - containerd | Wait for containerd
+
+- name: containerd | Restart containerd
+  systemd:
+    name: containerd
+    state: restarted
+    enabled: yes
+    daemon-reload: yes
+    masked: no
+
+- name: containerd | Wait for containerd
+  command: "ctr images ls -q"
+  register: containerd_ready
+  retries: 8
+  delay: 4
+  until: containerd_ready.rc == 0

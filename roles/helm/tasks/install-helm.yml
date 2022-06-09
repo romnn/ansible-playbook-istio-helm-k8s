@@ -3,9 +3,9 @@
   stat:
     path: '{{ helm_install_dir }}'
   changed_when: false
-  register: kubernetes_helm_binary_already_exists
+  register: helm_binary_already_exists
 
-- when: not kubernetes_helm_binary_already_exists.stat.exists
+- when: not helm_binary_already_exists.stat.exists
   block:
     - name: Getting the helm archive checksum
       uri:
@@ -18,7 +18,7 @@
       get_url:
         url: '{{ helm_download_url }}'
         dest: '/tmp/{{ helm_archive }}'
-        checksum: 'sha256:{{ helm_archive_checksum.content }}' #'{{ kubernetes_helm_checksum }}'
+        checksum: 'sha256:{{ helm_archive_checksum.content }}'
         mode: 0644
 
     - name: Create an installation directory for helm

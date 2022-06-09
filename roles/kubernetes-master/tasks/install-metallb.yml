@@ -1,0 +1,56 @@
+---
+- name: Enable strict ARP
+  become_user: "{{service_user}}"
+  script: "enable_strict_arp.py true"
+  register: enable_strict_arp
+  changed_when: '"changed" in enable_strict_arp.stdout'
+
+- name: Create a metallb namespace
+  become_user: "{{service_user}}"
+  kubernetes.core.k8s:
+    name: metallb-system
+    api_version: v1
+    kind: Namespace
+    state: present
+    definition:
+      metadata:
+        labels:
+          app: metallb
+
+- when: false
+  block:
+    - name: Download metallb manifest
+      become_user: "{{service_user}}"
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
+        dest: ~/metallb.yml
+        mode: 0664
+
+    - name: Apply metallb manifest
+      become_user: "{{service_user}}"
+      kubernetes.core.k8s:
+        state: present
+        src: ~/metallb.yml
+
+- when: true
+  block:
+    - name: Add metallb helm repo
+      become_user: "{{service_user}}"
+      kubernetes.core.helm_repository:
+        name: metallb
+        repo_url: "https://metallb.github.io/metallb"
+    
+    - name: Deploy metallb
+      become_user: "{{service_user}}"
+      kubernetes.core.helm:
+        name: metallb
+        chart_ref: metallb/metallb
+        release_namespace: metallb-system
+        wait: true
+        values:
+          configInline:
+            address-pools:
+             - name: default
+               protocol: layer2
+               addresses:
+               - "{{ apiserver_advertise_address }}-{{ apiserver_advertise_address }}"

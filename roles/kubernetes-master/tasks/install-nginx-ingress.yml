@@ -1,0 +1,26 @@
+---
+- name: Add ingress-nginx helm repo
+  become_user: "{{service_user}}"
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: "https://kubernetes.github.io/ingress-nginx"
+
+- name: Deploy ingress-nginx
+  become_user: "{{service_user}}"
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    wait: true
+    release_namespace: kube-system
+
+- name: Check if ingress load balancer was assigned the public IP
+  become_user: "{{service_user}}"
+  command: >
+    kubectl get services
+      -n kube-system ingress-nginx-controller
+      -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+  retries: 6
+  delay: 10
+  register: load_balancer_ingress_ip
+  changed_when: false
+  until: "apiserver_advertise_address in load_balancer_ingress_ip.stdout"

@@ -1,0 +1,110 @@
+---
+- when: false
+  block:
+    - name: Configure kernel to keep connections alive when enabling firewall
+      sysctl:
+        name: net.netfilter.nf_conntrack_tcp_be_liberal
+        value: 1
+        state: present
+        sysctl_set: yes
+        reload: yes
+
+    - name: Enable ufw
+      ufw: state=enabled
+
+    - name: configure ufw
+      command: "{{ item }}"
+      with_items:
+        - ufw allow ssh
+        - ufw allow 179/tcp
+        - ufw allow 4789/tcp
+        - ufw allow 5473/tcp
+        - ufw allow 443/tcp
+        - ufw allow 6443/tcp
+        - ufw allow 2379/tcp
+        - ufw allow 4149/tcp
+        - ufw allow 10250/tcp
+        - ufw allow 10255/tcp
+        - ufw allow 9099/tcp
+        # flannel
+        - ufw allow 8285/udp
+        - ufw allow 8472/udp
+
+- when: true
+  block:
+    - name: add enp0s3 interface to trusted zone
+      ansible.posix.firewalld:
+        zone: trusted
+        interface: enp0s3
+        permanent: yes
+        state: enabled
+
+    - name: add cni0 interface to trusted zone
+      ansible.posix.firewalld:
+        zone: trusted
+        interface: cni0
+        permanent: yes
+        state: enabled
+
+    - name: add enp0s8 interface to public zone
+      ansible.posix.firewalld:
+        zone: public
+        interface: enp0s8
+        permanent: yes
+        state: enabled
+
+    - name: open required public ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+        zone: public
+      with_items:
+        # - 8090/tcp # platform agent
+        # - 10250/tcp # kubelet API server
+        # - 10251/tcp # kube-scheduler
+        # - 10252/tcp # kube-controller-manager
+        # - 8285/udp # flannel
+        # - 8472/udp # flannel
+        - 6443/tcp # apiserver
+        # - 2379-2380/tcp # etcd server client API
+        - 22/tcp # ssh
+        - 80/tcp # http
+        - 80/udp # http
+        - 443/tcp # https
+        - 443/udp # https
+
+    - name: open required trusted ports
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: yes
+        state: enabled
+        zone: trusted
+      with_items:
+        - 8090/tcp # platform agent
+        - 10250/tcp # kubelet API server
+        - 10251/tcp # kube-scheduler
+        - 10252/tcp # kube-controller-manager
+        - 8285/udp # flannel
+        - 8472/udp # flannel
+        # - 6443/tcp # apiserver
+        - 2379-2380/tcp # etcd server client API
+        # - 22/tcp # ssh
+        # - 80/tcp # http
+        # - 80/udp # http
+        # - 443/tcp # https
+        # - 443/udp # https
+
+    # - name: enable masquerade
+    #   ansible.posix.firewalld:
+    #     masquerade: yes
+    #     state: enabled
+    #     permanent: yes
+    #     zone: trusted
+
+    - name: Restart firewalld
+      service:
+        name: firewalld
+        daemon_reload: yes
+        state: restarted
+

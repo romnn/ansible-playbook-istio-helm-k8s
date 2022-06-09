@@ -1,17 +1,28 @@
+- name: Determine host architecture
+  shell: dpkg --print-architecture
+  register: host_arch
+  changed_when: false
+
 - name: Add an apt signing key for kubernetes
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    keyring: /usr/share/keyrings/k8s-keyring.gpg
     state: present
 
 - name: Adding stable apt repository for kubernetes
   apt_repository:
-    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/k8s-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
     state: present
     filename: kubernetes.list
 
 - name: Install Kubernetes binaries
   apt:
-    name: ['kubelet', 'kubeadm', 'kubectl']
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+      - kubernetes-cni
+      - kubetail
     state: present
     update_cache: true
 
@@ -42,6 +53,9 @@
     enabled: true
 
 - name: Check if kubernetes has already been initialized
-  stat:
-    path: /etc/kubernetes/admin.conf
+  become_user: "{{service_user}}"
+  # become: true
+  # command: "kubectl --kubeconfig /home/{{service_user}}/.kube/config cluster-info"
+  command: "kubectl cluster-info"
   register: kubernetes_already_initialized
+  ignore_errors: true

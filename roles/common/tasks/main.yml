@@ -1,5 +1,9 @@
 ---
+- include_tasks: install-prerequisites.yml
+- include_tasks: prepare-netfilter.yml
 - include_tasks: install-docker.yml
+- include_tasks: setup-containerd.yml
 - include_tasks: install-nfs.yml
 - include_tasks: disable-swap.yml
 - include_tasks: install-kubernetes.yml
+- include_tasks: install-network-fabric.yml
