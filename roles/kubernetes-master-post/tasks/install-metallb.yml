@@ -17,40 +17,31 @@
         labels:
           app: metallb
 
-- when: false
-  block:
-    - name: Download metallb manifest
-      become_user: "{{service_user}}"
-      ansible.builtin.get_url:
-        url: https://raw.githubusercontent.com/metallb/metallb/v0.12.1/manifests/metallb.yaml
-        dest: ~/metallb.yml
-        mode: 0664
+- name: Add metallb helm repo
+  become_user: "{{service_user}}"
+  kubernetes.core.helm_repository:
+    name: metallb
+    repo_url: "https://metallb.github.io/metallb"
 
-    - name: Apply metallb manifest
-      become_user: "{{service_user}}"
-      kubernetes.core.k8s:
-        state: present
-        src: ~/metallb.yml
+- name: Deploy metallb
+  become_user: "{{service_user}}"
+  kubernetes.core.helm:
+    name: metallb
+    chart_ref: metallb/metallb
+    release_namespace: metallb-system
+    wait: true
+    chart_version: "{{metallb_version}}"
 
-- when: true
-  block:
-    - name: Add metallb helm repo
-      become_user: "{{service_user}}"
-      kubernetes.core.helm_repository:
-        name: metallb
-        repo_url: "https://metallb.github.io/metallb"
-    
-    - name: Deploy metallb
-      become_user: "{{service_user}}"
-      kubernetes.core.helm:
-        name: metallb
-        chart_ref: metallb/metallb
-        release_namespace: metallb-system
-        wait: true
-        values:
-          configInline:
-            address-pools:
-             - name: default
-               protocol: layer2
-               addresses:
-               - "{{ apiserver_advertise_address }}-{{ apiserver_advertise_address }}"
+- name: Configure metallb address pool using CRD
+  become_user: "{{service_user}}"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: metallb.io/v1beta1
+      kind: IPAddressPool
+      metadata:
+        name: metallb-address-pool
+        namespace: metallb-system
+      spec:
+        addresses:
+        - "{{ apiserver_advertise_address }}-{{ apiserver_advertise_address }}"

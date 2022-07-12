@@ -1,3 +1,0 @@
-
-cat input.yml | yq -y .foo.bar
-

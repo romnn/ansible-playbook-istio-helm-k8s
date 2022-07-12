@@ -6,12 +6,6 @@ NODES = 2
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 Vagrant.configure("2") do |config|
-    # config.ssh.username = "vagrant"
-    # config.ssh.password = "vagrant"
-    # config.ssh.insert_key = false
-    # config.ssh.private_key_path = "~/.ssh/id_rsa"
-    # config.ssh.forward_agent = true
-
     config.vm.provider "virtualbox" do |v, override|
       override.vm.box = IMAGE_NAME
       # Disable synced folders with virtualbox

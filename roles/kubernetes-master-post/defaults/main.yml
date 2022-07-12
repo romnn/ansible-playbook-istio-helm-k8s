@@ -1,4 +1,6 @@
 ---
+metallb_version: "0.13.3"
+
 # https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cmctl-linux-amd64.tar.gz
 certman_version: "1.8.0"
 cmctl_releases: "https://github.com/cert-manager/cert-manager/releases/download"
