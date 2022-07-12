@@ -1,7 +1,6 @@
 ---
 # Configures a k8s master node
 # - include_tasks: configure-firewall.yml
-- include_tasks: setup-nfs-share.yml
 - include_tasks: initialize-cluster.yml
 - include_tasks: configure-network-fabric.yml
 - include_tasks: disable-taint.yml
