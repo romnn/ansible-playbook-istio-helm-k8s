@@ -16,6 +16,11 @@
       metadata:
         labels:
           app: metallb
+          # kubernetes version that enforces pod security admission (beta in k8s 1.23),
+          # the namespace MetalLB is deployed to must be labelled with elevated permissions
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
 
 - name: Add metallb helm repo
   become_user: "{{service_user}}"
@@ -28,7 +33,7 @@
   kubernetes.core.helm:
     name: metallb
     chart_ref: metallb/metallb
-    release_namespace: metallb-system
+    namespace: metallb-system
     wait: true
     chart_version: "{{metallb_version}}"
 

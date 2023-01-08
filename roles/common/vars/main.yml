@@ -12,7 +12,8 @@ service_user: vagrant
 service_group: vagrant
 
 flanneld_release: "https://github.com/flannel-io/flannel/releases/download"
-flanneld_version: "0.18.1"
+# check newest version here: https://github.com/flannel-io/flannel/tags
+flanneld_version: "0.20.2"
 flanneld_platform: "amd64"
 flanneld_binary: "flanneld-{{flanneld_platform}}"
 flanneld_download_url: "{{flanneld_release}}/v{{flanneld_version}}/{{flanneld_binary}}"

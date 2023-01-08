@@ -1,15 +1,23 @@
 # -*- mode: ruby -*-
 # # vi: set ft=ruby :
 
-IMAGE_NAME = "ubuntu/jammy64"
-NODES = 2
+# IMAGE_NAME = "ubuntu/jammy64"
+# IMAGE_NAME = "bento/ubuntu-22.04"
+# IMAGE_NAME = "ubuntu/lunar64"
+IMAGE_NAME = "ubuntu/kinetic64"
+NODES = 1
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
 Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |v, override|
       override.vm.box = IMAGE_NAME
+      override.vm.box_download_insecure = true
       # Disable synced folders with virtualbox
       override.vm.synced_folder ".", "/vagrant", disabled: true
+
+      v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      # v.customize ['modifyvm', :id, '--cableconnected1', 'on']
+      # v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
       v.memory = 2048
       v.cpus = 2
     end
