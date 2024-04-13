@@ -2,19 +2,45 @@
   shell: dpkg --print-architecture
   register: host_arch
   changed_when: false
-
+- name: Create apt keyring directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
 - name: Add an apt signing key for kubernetes
   apt_key:
-    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    keyring: /usr/share/keyrings/k8s-keyring.gpg
+    # this is the old way
+    # url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    # keyring: /usr/share/keyrings/k8s-keyring.gpg
+    #
+    # the new way:
+    # curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    # sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    url: https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: present
-
+- name: Give insecure permissions to kubernetes apt keyring
+  file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    owner: root
+    group: root
+    mode: "0644"
 - name: Adding stable apt repository for kubernetes
   apt_repository:
-    repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/k8s-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+    # this was the old way:
+    # repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/k8s-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
+    # this is the new way:
+    # deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
+    repo: "deb [arch={{host_arch.stdout}}, signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/ /"
     state: present
-    filename: kubernetes.list
-
+    # filename: kubernetes.list
+    filename: kubernetes
+- name: Give insecure permissions to kubernetes apt source
+  file:
+    path: /etc/apt/sources.list.d/kubernetes.list
+    owner: root
+    group: root
+    mode: "0644"
 - name: Install Kubernetes binaries
   apt:
     name:
@@ -25,33 +51,28 @@
       - kubetail
     state: present
     update_cache: true
-
 - name: Creating kubelet config file
   file:
     path: /etc/default/kubelet
     state: touch
     modification_time: preserve
     access_time: preserve
-
 - name: Ensure kubelet extra args environment variable is set
   lineinfile:
     path: /etc/default/kubelet
-    regexp: '^KUBELET_EXTRA_ARGS.*'
+    regexp: "^KUBELET_EXTRA_ARGS.*"
     line: 'KUBELET_EXTRA_ARGS="--node-ip={{ node_ip | default(ansible_default_ipv4.address) }}"'
   register: kubelet_config
-
 - name: Reload systemd kubernetes daemon if config was changed
   systemd:
     name: kubelet
     daemon_reload: true
   when: kubelet_config is changed
-
 - name: Ensure kubelet is started and enabled at boot.
   service:
     name: kubelet
     state: started
     enabled: true
-
 - name: Check if kubernetes has already been initialized
   become_user: "{{service_user}}"
   # become: true
@@ -59,3 +80,4 @@
   command: "kubectl cluster-info"
   register: kubernetes_already_initialized
   ignore_errors: true
+  changed_when: false

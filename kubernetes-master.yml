@@ -1,4 +1,3 @@
----
 - name: K8s master node configuration
   hosts: k8s-masters
   become: true
@@ -8,6 +7,5 @@
     - role: helm
     - role: kubernetes-master
     - role: kubernetes-master-post
-    # - role: istio
-    #   when: enable_istio|bool
-
+  # - role: istio
+  #   when: enable_istio|bool

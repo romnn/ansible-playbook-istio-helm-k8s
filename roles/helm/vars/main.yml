@@ -1,14 +1,12 @@
----
+# example urls
 # archive:  https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz
 # checksum  https://get.helm.sh/helm-v2.14.1-linux-amd64.tar.gz.sha256
 helm_mirror: "https://get.helm.sh"
-helm_version: "3.9.0"
+helm_version: "3.14.4"
 helm_platform: "linux-amd64"
 helm_archive: "helm-v{{helm_version}}-{{helm_platform}}.tar.gz"
 helm_download_url: "{{helm_mirror}}/{{helm_archive}}"
 helm_checksum_url: "{{helm_download_url}}.sha256"
-
 helm_bin_dir: "/usr/local/bin"
 helm_install_dir: "{{helm_bin_dir}}/helm-v{{helm_version}}"
-
 helm_add_stable_repo: true

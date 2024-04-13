@@ -1,4 +1,3 @@
----
 - name: containerd | Copy containerd config file
   template:
     src: config.toml.j2
@@ -6,12 +5,9 @@
     # owner: "root"
     mode: 0640
   notify: restart containerd
-
-# you can sometimes end up in a state where everything is installed
-# but containerd was not started / enabled
+# Ensure containerd is started and enabled
 - name: containerd | Flush handlers
   meta: flush_handlers
-
 - name: containerd | Ensure containerd is started and enabled
   systemd:
     name: containerd

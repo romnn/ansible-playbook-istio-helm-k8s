@@ -1,7 +1,6 @@
----
 - name: Remove previous docker versions
   apt:
-    name: 
+    name:
       - docker
       - docker-engine
       - docker.io
@@ -9,32 +8,27 @@
       - runc
     state: absent
     update_cache: true
-
 - name: Add an apt signing key for Docker
   apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     keyring: /usr/share/keyrings/docker-archive-keyring.gpg
     state: present
-
 - name: Determine host architecture
   shell: dpkg --print-architecture
   register: host_arch
   changed_when: false
-
 - name: Determine host os release name
   shell: lsb_release -cs
   register: host_os_release
   changed_when: false
-
 - name: Add apt repository for stable version
   apt_repository:
     repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{host_os_release.stdout}} stable"
     state: present
     update_cache: yes
-
 - name: Install docker and its dependecies
   apt:
-    name: 
+    name:
       - docker-ce
       - docker-ce-cli
       - containerd.io
@@ -43,31 +37,26 @@
     update_cache: yes
   notify:
     - docker status
-
 - name: Creates directory
   file:
     path: /etc/docker
     state: directory
-
 - name: Configure docker daemon
   template:
     src: docker-deamon.json
     dest: /etc/docker/daemon.json
   register: docker_config
-
 - name: Ensure Docker is started and enabled at boot
   service:
     name: docker
     state: restarted
     enabled: true
   when: docker_config is changed
-
 - name: Add {{service_user}} user to docker group
   user:
     name: "{{service_user}}"
-    group: docker
+    groups: docker
     append: yes
-
 - name: Check docker is working
   shell: docker run hello-world
   register: docker_hello_world

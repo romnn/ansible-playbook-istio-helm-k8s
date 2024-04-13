@@ -1,14 +1,11 @@
----
 - name: Set node hostname
   when: "hostname is defined"
   ansible.builtin.hostname:
     name: "{{ hostname }}"
-
 - name: Update all packages to the latest version.
   apt:
     upgrade: dist
     update_cache: yes
-
 - name: Install required dependencies
   apt:
     name:
@@ -26,34 +23,32 @@
       - firewalld
     state: present
     update_cache: yes
-
 - name: Install pip packages on remote for ansible
   pip:
     name:
       - yq
       - pyyaml
       - kubernetes
-
 - name: Disable firewalld
   service:
     name: firewalld
     state: stopped
     enabled: false
   ignore_errors: true
-
 - name: Disable ufw
   service:
     name: ufw
     state: stopped
     enabled: false
   ignore_errors: true
-
 - name: Disable ufw
   ufw:
     state: disabled
-
-- name: Set SELinux to permissive
+- name: Get SELinux status
+  command: getenforce
+  register: "selinux_status"
+  changed_when: false
+- name: Disable SELinux
+  when: "(selinux_status.stdout | lower | trim) != 'disabled'"
   command: setenforce 0
-  register: selinux_permissive
-  failed_when: 'selinux_permissive.rc != 0 and "SELinux is disabled" not in selinux_permissive.stderr'
-
+  register: configure_selinux
