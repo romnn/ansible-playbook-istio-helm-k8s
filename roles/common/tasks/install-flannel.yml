@@ -6,12 +6,6 @@
     group: "{{service_group}}"
     state: directory
     mode: 0755
-# - name: Check for existing installation of flanneld
-#   stat:
-#     path: "{{ flanneld_install }}"
-#   changed_when: false
-#   register: flanneld_binary_already_exists
-# - when: not flanneld_binary_already_exists.stat.exists
 - name: Check for existing installation of flannel
   command: "flanneld --version"
   register: installed_flannel_version

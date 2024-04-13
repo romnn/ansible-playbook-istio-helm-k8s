@@ -10,12 +10,6 @@
           skip: true
           paths:
             - "{{ role_path }}/vars"
-    # - name: Checks for istio install
-    #   stat:
-    #     path: "{{ istio_bin_dir }}/istioctl"
-    #   register: istio_binary
-    #   changed_when: False
-    # - when: not istio_binary.stat.exists
     - name: Check for existing installation of istio
       command: "{{ istio_bin_dir }}/istioctl version --short"
       register: istio_installed_version

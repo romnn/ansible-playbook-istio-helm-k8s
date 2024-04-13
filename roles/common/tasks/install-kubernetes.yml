@@ -9,13 +9,6 @@
     mode: "0755"
 - name: Add an apt signing key for kubernetes
   apt_key:
-    # this is the old way
-    # url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    # keyring: /usr/share/keyrings/k8s-keyring.gpg
-    #
-    # the new way:
-    # curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    # sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     url: https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/Release.key
     keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: present
@@ -27,10 +20,6 @@
     mode: "0644"
 - name: Add stable apt repository for kubernetes
   apt_repository:
-    # this was the old way:
-    # repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/k8s-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
-    # this is the new way:
-    # deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
     repo: "deb [arch={{host_arch.stdout}}, signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/ /"
     state: present
     filename: kubernetes

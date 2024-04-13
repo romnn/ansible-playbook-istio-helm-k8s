@@ -1,9 +1,3 @@
-# - name: Check for existing installation of helm
-#   stat:
-#     path: "{{ helm_install_dir }}"
-#   changed_when: false
-#   register: helm_binary_already_exists
-# - when: not helm_binary_already_exists.stat.exists
 - name: Check for existing installation of helm
   command: "helm version --template={{ '{{' }}.Version{{ '}}' }}"
   register: helm_installed_version
