@@ -8,7 +8,6 @@ ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 Vagrant.configure("2") do |config|
     config.vm.provider "virtualbox" do |vbox, override|
       override.vm.box = IMAGE_NAME
-      # override.vm.box_version = IMAGE_VERSION
 
       # Disable synced folders with virtualbox
       override.vm.synced_folder ".", "/vagrant", disabled: true

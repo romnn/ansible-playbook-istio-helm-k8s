@@ -1,4 +1,3 @@
----
 - include_tasks: install-prerequisites.yml
 - include_tasks: setup-netfilter.yml
 # - include_tasks: setup-firewall.yml
@@ -6,4 +5,4 @@
 - include_tasks: setup-containerd.yml
 - include_tasks: disable-swap.yml
 - include_tasks: install-kubernetes.yml
-- include_tasks: install-network-fabric.yml
+- include_tasks: install-flannel.yml

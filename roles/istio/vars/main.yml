@@ -1,5 +1,4 @@
----
-istio_name: istio-{{ istio_ver }}
+istio_name: istio-{{ istio_version }}
 istio_tgz: '{{ istio_name }}-{{ istio_os }}.{{ istio_archive | default("tar.gz") }}'
-istio_tgz_url: '{{ istio_mirror }}/{{ istio_ver }}/{{ istio_tgz }}'
-istio_checksum: '{{ istio_checksums[istio_ver][istio_os] }}'
+istio_tgz_url: "{{ istio_mirror }}/{{ istio_version }}/{{ istio_tgz }}"
+istio_checksum_url: "{{ istio_mirror }}/{{ istio_version }}/istio-{{ istio_version }}-{{ istio_os }}.tar.gz.sha256"

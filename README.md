@@ -13,9 +13,9 @@ makes the _worker_ machines join the cluster.
 
 #### Try it out
 
-ansible-galaxy collection install ansible.posix
-ansible-galaxy collection install community.general
-ansible-galaxy collection install kubernetes.core
+ansible-galaxy collection install --force ansible.posix
+ansible-galaxy collection install --force community.general
+ansible-galaxy collection install --force kubernetes.core
 
 To try out the playbook, install the following packages (assumes you are running on ubuntu):
 

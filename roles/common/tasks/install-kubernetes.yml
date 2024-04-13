@@ -25,7 +25,7 @@
     owner: root
     group: root
     mode: "0644"
-- name: Adding stable apt repository for kubernetes
+- name: Add stable apt repository for kubernetes
   apt_repository:
     # this was the old way:
     # repo: "deb [arch={{host_arch.stdout}}, signed-by=/usr/share/keyrings/k8s-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main"
@@ -33,7 +33,6 @@
     # deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
     repo: "deb [arch={{host_arch.stdout}}, signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_version }}/deb/ /"
     state: present
-    # filename: kubernetes.list
     filename: kubernetes
 - name: Give insecure permissions to kubernetes apt source
   file:
@@ -51,7 +50,7 @@
       - kubetail
     state: present
     update_cache: true
-- name: Creating kubelet config file
+- name: Create kubelet config file
   file:
     path: /etc/default/kubelet
     state: touch
@@ -75,8 +74,6 @@
     enabled: true
 - name: Check if kubernetes has already been initialized
   become_user: "{{service_user}}"
-  # become: true
-  # command: "kubectl --kubeconfig /home/{{service_user}}/.kube/config cluster-info"
   command: "kubectl cluster-info"
   register: kubernetes_already_initialized
   ignore_errors: true

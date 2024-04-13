@@ -1,11 +1,9 @@
----
 - name: Download flannel manifest
   become_user: "{{service_user}}"
   ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
     dest: ~/kube-flannel.yml
     mode: 0664
-
 - name: Apply flannel network fabric manifest
   become_user: "{{service_user}}"
   kubernetes.core.k8s:

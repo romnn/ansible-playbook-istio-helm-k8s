@@ -14,7 +14,8 @@ flanneld_version: "0.25.1"
 flanneld_platform: "amd64"
 flanneld_binary: "flanneld-{{flanneld_platform}}"
 flanneld_download_url: "{{flanneld_release}}/v{{flanneld_version}}/{{flanneld_binary}}"
-flanneld_bin_dir: "/opt/bin/"
+# flanneld_bin_dir: "/opt/bin"
+flanneld_bin_dir: "/usr/local/bin"
 flanneld_install: "{{flanneld_bin_dir}}/flanneld-{{flanneld_platform}}-v{{flanneld_version}}"
 # Flannel config files.
 # https://github.com/flannel-io/flannel/releases/download/v0.18.1/flanneld-amd64

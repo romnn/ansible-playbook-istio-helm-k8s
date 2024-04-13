@@ -1,0 +1,54 @@
+- name: "Create {{ flanneld_bin_dir }} directory"
+  become: true
+  file:
+    path: "{{ flanneld_bin_dir }}"
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
+    state: directory
+    mode: 0755
+# - name: Check for existing installation of flanneld
+#   stat:
+#     path: "{{ flanneld_install }}"
+#   changed_when: false
+#   register: flanneld_binary_already_exists
+# - when: not flanneld_binary_already_exists.stat.exists
+- name: Check for existing installation of flannel
+  command: "flanneld --version"
+  register: installed_flannel_version
+  changed_when: false
+  failed_when: false
+- debug:
+    msg: "flannel version: {{ installed_flannel_version }}"
+- name: Extract installed flannel version
+  set_fact:
+    installed_flannel_version: "{{ ((installed_flannel_version.stdout | regex_search('v([\\d.]+)', '\\1')) or ['']) | first }}"
+- name: Extract desired flannel version
+  set_fact:
+    desired_flannel_version: "v{{ flanneld_version }}"
+- debug:
+    msg: "flannel: installed={{ installed_flannel_version }} desired={{ desired_flannel_version }}"
+- when: "installed_flannel_version != desired_flannel_version"
+  block:
+    - name: Download flanneld binary
+      get_url:
+        url: "{{ flanneld_download_url }}"
+        dest: "{{ flanneld_install }}"
+        mode: 0755
+- name: Change permissions of flanneld
+  file:
+    path: "{{ flanneld_install }}"
+    mode: 0755
+- name: Link the flanneld binary
+  file:
+    src: "{{ flanneld_install }}"
+    dest: "{{ flanneld_bin_dir }}/flanneld"
+    owner: "{{service_user}}"
+    group: "{{service_group}}"
+    state: link
+    mode: 0755
+# Download and apply manifest
+# - name: Download metrics-server manifest to the cluster.
+#   ansible.builtin.get_url:
+#     url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#     dest: ~/metrics-server.yaml
+#     mode: '0755'

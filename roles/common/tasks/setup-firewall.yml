@@ -1,4 +1,3 @@
----
 - when: false
   block:
     - name: Configure kernel to keep connections alive when enabling firewall
@@ -8,11 +7,9 @@
         state: present
         sysctl_set: yes
         reload: yes
-
     - name: Enable ufw
       ufw: state=enabled
-
-    - name: configure ufw
+    - name: Configure ufw
       command: "{{ item }}"
       with_items:
         - ufw allow ssh
@@ -29,31 +26,27 @@
         # flannel
         - ufw allow 8285/udp
         - ufw allow 8472/udp
-
 - when: true
   block:
-    - name: add enp0s3 interface to trusted zone
+    - name: Add enp0s3 interface to trusted zone
       ansible.posix.firewalld:
         zone: trusted
         interface: enp0s3
         permanent: yes
         state: enabled
-
-    - name: add cni0 interface to trusted zone
+    - name: Add cni0 interface to trusted zone
       ansible.posix.firewalld:
         zone: trusted
         interface: cni0
         permanent: yes
         state: enabled
-
-    - name: add enp0s8 interface to public zone
+    - name: Add enp0s8 interface to public zone
       ansible.posix.firewalld:
         zone: public
         interface: enp0s8
         permanent: yes
         state: enabled
-
-    - name: open required public ports
+    - name: Open required public ports
       ansible.posix.firewalld:
         port: "{{ item }}"
         permanent: yes
@@ -73,8 +66,7 @@
         - 80/udp # http
         - 443/tcp # https
         - 443/udp # https
-
-    - name: open required trusted ports
+    - name: Open required trusted ports
       ansible.posix.firewalld:
         port: "{{ item }}"
         permanent: yes
@@ -94,17 +86,14 @@
         # - 80/udp # http
         # - 443/tcp # https
         # - 443/udp # https
-
-    # - name: enable masquerade
+    # - name: Enable masquerade
     #   ansible.posix.firewalld:
     #     masquerade: yes
     #     state: enabled
     #     permanent: yes
     #     zone: trusted
-
     - name: Restart firewalld
       service:
         name: firewalld
         daemon_reload: yes
         state: restarted
-

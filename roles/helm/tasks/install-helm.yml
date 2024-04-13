@@ -1,11 +1,25 @@
+# - name: Check for existing installation of helm
+#   stat:
+#     path: "{{ helm_install_dir }}"
+#   changed_when: false
+#   register: helm_binary_already_exists
+# - when: not helm_binary_already_exists.stat.exists
 - name: Check for existing installation of helm
-  stat:
-    path: "{{ helm_install_dir }}"
+  command: "helm version --template={{ '{{' }}.Version{{ '}}' }}"
+  register: helm_installed_version
   changed_when: false
-  register: helm_binary_already_exists
-- when: not helm_binary_already_exists.stat.exists
+  failed_when: false
+- name: Extract installed helm version
+  set_fact:
+    installed_helm_version: "{{ ((helm_installed_version.stdout | regex_search('v([\\d.]+)', '\\1')) or ['']) | first }}"
+- name: Extract desired helm version
+  set_fact:
+    desired_helm_version: "v{{ helm_version }}"
+- debug:
+    msg: "helm: installed={{ installed_helm_version }} desired={{ desired_helm_version }}"
+- when: "installed_helm_version != desired_helm_version"
   block:
-    - name: Getting the helm archive checksum
+    - name: Get the helm archive checksum
       uri:
         url: "{{ helm_checksum_url }}"
         return_content: true
@@ -16,24 +30,24 @@
         url: "{{ helm_download_url }}"
         dest: "/tmp/{{ helm_archive }}"
         checksum: "sha256:{{ helm_archive_checksum.content }}"
-        mode: 0644
+        mode: 0755
     - name: Create an installation directory for helm
       file:
         path: "{{ helm_install_dir }}"
         state: directory
         mode: 0755
-    - name: Unarchiving helm
+    - name: Unarchive helm
       unarchive:
         copy: no
         src: "/tmp/{{ helm_archive }}"
         dest: "{{ helm_install_dir }}"
         creates: "{{ helm_install_dir }}/{{ helm_platform }}"
   always:
-    - name: Cleaning helm archive
+    - name: Remove helm archive
       file:
         path: "/tmp/{{ helm_archive }}"
         state: absent
-- name: Linking the helm binary
+- name: Link helm binary
   file:
     src: "{{ helm_install_dir }}/{{ helm_platform }}/helm"
     dest: "{{ helm_bin_dir }}/helm"

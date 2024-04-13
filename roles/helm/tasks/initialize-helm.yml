@@ -48,3 +48,7 @@
   failed_when:
     - "helm_diff_plugin.rc != 0"
     - "'plugin already exists' not in helm_diff_plugin.stderr"
+- name: Update helm diff plugin
+  command: helm plugin update diff
+  register: helm_diff_plugin_update
+  changed_when: "'Updated plugin: diff' in helm_diff_plugin_update"

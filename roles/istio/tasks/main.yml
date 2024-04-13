@@ -1,61 +1,78 @@
----
 - when: enable_istio
   block:
-  - name: Resolve platform specific vars for istio
-    include_vars: '{{ item }}'
-    with_first_found:
-    - files:
-      - '{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml'
-      - '{{ ansible_distribution }}.yml'
-      - '{{ ansible_os_family }}.yml'
-      skip: true
-      paths:
-      - '{{ role_path }}/vars'
-  
-  - name: Checks for istio install
-    stat:
-      path: '{{ istio_bin_dir }}/istioctl'
-    register: istio_binary
-    changed_when: False
-  
-  - when: not istio_binary.stat.exists
-    block:
-    - name: Download istio
-      get_url:
-        url: '{{ istio_tgz_url }}'
-        dest: /tmp/{{ istio_tgz }}
-        checksum: '{{ istio_checksum }}'
-        mode: 0644
+    - name: Resolve platform specific vars for istio
+      include_vars: "{{ item }}"
+      with_first_found:
+        - files:
+            - "{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml"
+            - "{{ ansible_distribution }}.yml"
+            - "{{ ansible_os_family }}.yml"
+          skip: true
+          paths:
+            - "{{ role_path }}/vars"
+    # - name: Checks for istio install
+    #   stat:
+    #     path: "{{ istio_bin_dir }}/istioctl"
+    #   register: istio_binary
+    #   changed_when: False
+    # - when: not istio_binary.stat.exists
+    - name: Check for existing installation of istio
+      command: "{{ istio_bin_dir }}/istioctl version --short"
+      register: istio_installed_version
+      changed_when: false
+      failed_when: false
+    - name: Extract installed istio version
+      set_fact:
+        installed_helm_version: "{{ istio_installed_version }}"
+    - name: Extract desired istio version
+      set_fact:
+        desired_helm_version: "{{ istio_version }}"
+    - debug:
+        msg: "istio: installed={{ installed_istio_version }} desired={{ desired_istio_version }}"
+    - when: "installed_istio_version != desired_istio_version"
+      block:
+        - name: Get istio archive checksum
+          uri:
+            url: "{{ istio_checksum_url }}"
+            return_content: true
+          changed_when: false
+          register: istio_archive_checksum
+        - name: Download istio
+          get_url:
+            url: "{{ istio_tgz_url }}"
+            dest: /tmp/{{ istio_tgz }}
+            checksum: "{{ istio_archive_checksum.content }}"
+            mode: 0755
+            owner: "{{service_user}}"
+            group: "{{service_group}}"
+        - name: Create an installation directory for istio
+          file:
+            path: "{{ istio_install_dir }}"
+            state: directory
+            mode: 0755
+        - name: Unarchive istio
+          unarchive:
+            copy: no
+            src: "/tmp/{{ istio_tgz }}"
+            dest: "{{ istio_install_dir }}"
+            creates: "{{ istio_install_dir }}/istio-{{ istio_version }}/bin"
+      always:
+        - name: cleanup...
+          file:
+            path: /tmp/{{ istio_tgz }}
+            state: absent
+    - file:
+        dest: "{{ istio_install_dir }}"
+        owner: "{{ service_user }}"
+        group: "{{ service_group }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+    - debug:
+        msg: "Linking the istioctl binary from {{ istio_install_dir }}/istio-{{ istio_version }}/bin/istioctl to {{ istio_bin_dir }}/istioctl"
+    - name: Link the istioctl binary
+      file:
+        src: "{{ istio_install_dir }}/istio-{{ istio_version }}/bin/istioctl"
+        dest: "{{ istio_bin_dir }}/istioctl"
         owner: "{{service_user}}"
         group: "{{service_group}}"
-
-    - name: Create an installation directory for istio
-      file:
-        path: '{{ istio_install_dir }}'
-        state: directory
-        mode: 0755
-    
-    - name: Unarchive istio
-      unarchive:
-        copy: no
-        src: '/tmp/{{ istio_tgz }}'
-        dest: '{{ istio_install_dir }}'
-        creates: '{{ istio_install_dir }}/istio-{{ istio_ver }}/bin'
-    always:
-      - name: cleanup...
-        file:
-          path: /tmp/{{ istio_tgz }}
-          state: absent
-
-  - file: dest={{ istio_install_dir }} owner={{service_user}} group={{service_group}} mode=u=rwX,g=rX,o=rX recurse=yes
-
-  - debug:
-      msg: "Linking the istioctl binary from {{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl to {{ istio_bin_dir }}/istioctl"
-
-  - name: Linking the istioctl binary
-    file:
-      src: '{{ istio_install_dir }}/istio-{{ istio_ver }}/bin/istioctl'
-      dest: '{{ istio_bin_dir }}/istioctl'
-      owner: "{{service_user}}"
-      group: "{{service_group}}"
-      state: link
+        state: link
