@@ -4,7 +4,8 @@
     name: "{{ hostname }}"
 - name: Update all packages to the latest version.
   apt:
-    upgrade: dist
+    upgrade: yes
+    # upgrade: dist
     update_cache: yes
 - name: Install required dependencies
   apt:

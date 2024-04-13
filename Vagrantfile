@@ -2,9 +2,6 @@
 # # vi: set ft=ruby :
 
 IMAGE_NAME = "ubuntu/jammy64"
-# IMAGE_NAME = "ubuntu/focal64"
-# IMAGE_VERSION = "v20240305.0.0"
-# IMAGE_NAME = "bento/ubuntu-22.04"
 NODES = 1
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
@@ -19,14 +16,21 @@ Vagrant.configure("2") do |config|
       vbox.cpus = 4
 
       # vbox.customize ['modifyvm', :id, '--accelerate3d', 'on']
-      # This is commented out until resolution has been found for proper
-      # usage. For now it will use the default graphics controller.
-      vbox.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
-      # vbox.customize ['modifyvm', :id, '--graphicscontroller', 'vboxvga']
       # vbox.customize ['modifyvm', :id, '--hwvirtex', 'on']
       # vbox.customize ['modifyvm', :id, '--ioapic', 'on']
       # vbox.customize ['modifyvm', :id, '--vram', '128']
+      # vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      # vbox.customize ['modifyvm', :id, '--cableconnected1', 'on']
+      # vbox.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+      # vbox.customize ['modifyvm', :id, '--graphicscontroller', 'vboxvga']
+      vbox.customize ['modifyvm', :id, '--graphicscontroller', 'vmsvga']
       vbox.customize ['modifyvm', :id, '--audio', 'none']
+
+      override.vm.box_download_insecure = true
+      # Disable synced folders with virtualbox
+      override.vm.synced_folder ".", "/vagrant", disabled: true
+
+      
     end
 
     config.vm.define "k8s-master" do |master|

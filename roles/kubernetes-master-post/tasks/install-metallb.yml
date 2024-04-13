@@ -1,10 +1,8 @@
----
 - name: Enable strict ARP
   become_user: "{{service_user}}"
   script: "enable_strict_arp.py true"
   register: enable_strict_arp
   changed_when: '"changed" in enable_strict_arp.stdout'
-
 - name: Create a metallb namespace
   become_user: "{{service_user}}"
   kubernetes.core.k8s:
@@ -16,22 +14,24 @@
       metadata:
         labels:
           app: metallb
-
+          # kubernetes version that enforces pod security admission (beta in k8s 1.23),
+          # the namespace MetalLB is deployed to must be labelled with elevated permissions
+          pod-security.kubernetes.io/enforce: privileged
+          pod-security.kubernetes.io/audit: privileged
+          pod-security.kubernetes.io/warn: privileged
 - name: Add metallb helm repo
   become_user: "{{service_user}}"
   kubernetes.core.helm_repository:
     name: metallb
     repo_url: "https://metallb.github.io/metallb"
-
 - name: Deploy metallb
   become_user: "{{service_user}}"
   kubernetes.core.helm:
     name: metallb
     chart_ref: metallb/metallb
-    release_namespace: metallb-system
+    namespace: metallb-system
     wait: true
     chart_version: "{{metallb_version}}"
-
 - name: Configure metallb address pool using CRD
   become_user: "{{service_user}}"
   kubernetes.core.k8s:
@@ -44,4 +44,4 @@
         namespace: metallb-system
       spec:
         addresses:
-        - "{{ apiserver_advertise_address }}-{{ apiserver_advertise_address }}"
+          - "{{ apiserver_advertise_address }}-{{ apiserver_advertise_address }}"
