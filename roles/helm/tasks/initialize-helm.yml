@@ -51,4 +51,4 @@
 - name: Update helm diff plugin
   command: helm plugin update diff
   register: helm_diff_plugin_update
-  changed_when: "'Updated plugin: diff' in helm_diff_plugin_update"
+  changed_when: "'Updated plugin: diff' in helm_diff_plugin_update.stdout"
